@@ -1,0 +1,22 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Nueva Palabra</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content style="--background: rgb(141, 40, 41)">
+  <div class="newWordCont">
+    <span>Palabra:</span> 
+    <input type="text" name="" id="" value="" [(ngModel)]='newWord.word'>
+    <span>Definicion:</span> 
+    <textarea name="" id="" rows="4" [(ngModel)]='newWord.definition'></textarea>  
+  </div>
+  <div class="buttonsNewWord">
+    <ion-button color="primary" (click)='saveNewWord()'>
+      <ion-icon class='editbutton' name="save" ></ion-icon>Guardar
+    </ion-button>
+    <ion-button color="secondary" (click)='closeModal()'>
+      <ion-icon class='editbutton' name="close-circle-outline" ></ion-icon>Cerrar
+    </ion-button>
+  </div>
+</ion-content>
+

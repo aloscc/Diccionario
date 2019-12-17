@@ -1,5 +1,7 @@
 {
   "name": "Diccionario",
-  "integrations": {},
+  "integrations": {
+    "cordova": {}
+  },
   "type": "angular"
 }

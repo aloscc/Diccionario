@@ -1,0 +1,41 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Nuevo Diccionario</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content style="--background: rgb(141, 40, 41)">
+  <ion-list-header>Single Selection</ion-list-header>
+  <ion-item>
+    <ion-label>From:</ion-label>
+    <ion-select placeholder="Select One" (ionChange)="getFromIdiom($event)">
+      <ion-select-option *ngFor="let f_idiom of idioms" [value]="f_idiom">{{f_idiom}}</ion-select-option>
+    </ion-select>
+  </ion-item>
+  <ion-item>
+    <ion-label>To:</ion-label>
+    <ion-select placeholder="Select One" (ionChange)="getToIdiom($event)">
+      <ion-select-option *ngFor="let t_idiom of idioms" [value]="t_idiom">{{t_idiom}}</ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <div class='row' style="margin: 4%;" >
+    <br />
+    <div class="col-md-12">
+      Seleccione archivo de carga:   
+    </div>
+    <br />
+    <div class="col-md-12">
+      <input type="file" (change)="handleFileSelect($event)"  #fileInput multiple/>
+    </div>
+  </div>
+
+  <div class="buttonsNewDictionary">
+    <ion-button color="primary" (click)='saveNewDictionary()'>
+      <ion-icon class='newDict' name="save" ></ion-icon>Guardar
+    </ion-button>
+    <ion-button color="secondary" (click)='closeModal()'>
+      <ion-icon class='newDict' name="close-circle-outline" ></ion-icon>Cerrar
+    </ion-button>
+  </div>
+</ion-content>
+

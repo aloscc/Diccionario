@@ -5,8 +5,12 @@ import { IonicModule } from '@ionic/angular';
 import { RouterModule } from '@angular/router';
 
 import { ListPage } from './list.page';
+import { ModalComponent } from './modal/modal.component';
 
 @NgModule({
+  declarations: [ListPage, ModalComponent],
+  exports: [ModalComponent],
+  entryComponents: [ModalComponent],
   imports: [
     CommonModule,
     FormsModule,
@@ -17,7 +21,6 @@ import { ListPage } from './list.page';
         component: ListPage
       }
     ])
-  ],
-  declarations: [ListPage]
+  ]
 })
 export class ListPageModule {}
