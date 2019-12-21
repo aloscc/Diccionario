@@ -64,6 +64,7 @@ export class ModaldictionaryComponent implements OnInit {
 
   saveNewDictionary() {
     const query2Dict = `INSERT INTO dictionary (fromidiom, toidiom) VALUES('${this.fromIdiom}', '${this.toIdiom}'); `;
+    const tablename = this.fromIdiom + this.toIdiom;
     const loadingElement = this.loadingController.create({
       message: 'Cargando BD...',
       spinner: 'crescent'
@@ -72,7 +73,7 @@ export class ModaldictionaryComponent implements OnInit {
       res.present();
       this.db.addDictionaryName(query2Dict).then(rs => {
         if (rs) {
-          return this.db.seedDatabaseDinamic(this.allLines);
+          return this.db.seedDatabaseDinamic(this.allLines, tablename);
         } else {
           console.log('Hubo un error al cargar la base de datos.');
           return false;

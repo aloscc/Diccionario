@@ -1,17 +1,18 @@
 <ion-header>
   <ion-toolbar>
-    <ion-buttons slot="start">
+    <ion-buttons slot="start" *ngIf="currentTable != ''">
       <div class="">
-      <ion-searchbar (ionClear)="searchWords('')" [(ngModel)]="searchword" placeholder="Buscar"></ion-searchbar>
-    </div>
-    <div class="">
-      <ion-button color="secondary" (click)='searchWords(searchword)'>
-        <ion-icon name="search"></ion-icon>
-      </ion-button>   
-    </div>
+        <ion-searchbar (ionClear)="searchWords('')" [(ngModel)]="searchword" placeholder="Buscar"></ion-searchbar>
+      </div>
+      <div class="">
+        <ion-button color="secondary" (click)='searchWords(searchword)'>
+          <ion-icon name="search"></ion-icon>
+        </ion-button>   
+      </div>
     </ion-buttons>
     <ion-buttons slot="end">
-      <span><ion-icon class="iconadd" name="add" (click) = "addNewWord()"></ion-icon></span>
+      <span><ion-icon class="iconbook" name="book" (click) = "presentPopover($event)"></ion-icon></span>
+      <span *ngIf="currentTable != ''"><ion-icon class="iconadd" name="add" (click) = "addNewWord()"></ion-icon></span>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
@@ -44,16 +45,16 @@
           <textarea name="" id="" rows="4" [(ngModel)]='editword.definition'></textarea>
         </div>
         <div class='buttonsEdit'>
-           <span><ion-icon class='editbutton' name="checkbox-outline" (click) = "editWord(editword)"></ion-icon></span>
-           <span><ion-icon class='deletebutton' name="trash" (click) = "deleteWord(word)"></ion-icon></span>
-           <span><ion-icon class='closebutton' name="close-circle-outline" (click) = "closeEdit()"></ion-icon></span>
+          <span><ion-icon class='editbutton' name="checkbox-outline" (click) = "editWord(editword)"></ion-icon></span>
+          <span><ion-icon class='deletebutton' name="trash" (click) = "deleteWord(word)"></ion-icon></span>
+          <span><ion-icon class='closebutton' name="close-circle-outline" (click) = "closeEdit()"></ion-icon></span>
         </div>
       </ion-label>
     </ion-item>
   </ion-list>
   <ion-infinite-scroll threshold="100px" (ionInfinite)="loadData($event)">
-      <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more data...">
-      </ion-infinite-scroll-content>
+    <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more data...">
+    </ion-infinite-scroll-content>
   </ion-infinite-scroll>
-  
+
 </ion-content>

@@ -9,6 +9,7 @@ import { DatabaseService  } from 'src/app/services/database.service';
   styleUrls: ['./modal.component.scss'],
 })
 export class ModalComponent implements OnInit {
+  @Input() table;
   newWord:Word = {wordId:0, word:'', definition: ''};
   constructor(
     private modalController: ModalController,
@@ -20,7 +21,7 @@ export class ModalComponent implements OnInit {
     this.modalController.dismiss();
   }
   saveNewWord() {
-    this.databaseservice.addWord(this.newWord).then(res => {
+    this.databaseservice.addWord(this.newWord, this.table).then(res => {
       if (res) {
         console.log('guardado con exito!');
       } else {

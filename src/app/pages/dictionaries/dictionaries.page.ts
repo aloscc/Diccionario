@@ -26,7 +26,8 @@ export class DictionariesPage implements OnInit {
   constructor(
     private modalController: ModalController,
     private databaseservice: DatabaseService
-  ) {}
+  ) {
+  }
 
   ngOnInit() {
     this.databaseservice.getDictionaries().subscribe((dictionaries: Dictionary[]) => {

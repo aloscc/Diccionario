@@ -6,11 +6,12 @@ import { RouterModule } from '@angular/router';
 
 import { ListPage } from './list.page';
 import { ModalComponent } from './modal/modal.component';
+import { PopoverComponent } from './popover/popover.component';
 
 @NgModule({
-  declarations: [ListPage, ModalComponent],
-  exports: [ModalComponent],
-  entryComponents: [ModalComponent],
+  declarations: [ListPage, ModalComponent, PopoverComponent],
+  exports: [ModalComponent, PopoverComponent],
+  entryComponents: [ModalComponent, PopoverComponent],
   imports: [
     CommonModule,
     FormsModule,

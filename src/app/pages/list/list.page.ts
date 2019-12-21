@@ -4,6 +4,8 @@ import { DatabaseService  } from 'src/app/services/database.service';
 import { IonInfiniteScroll } from '@ionic/angular';
 import { ModalController } from '@ionic/angular';
 import { ModalComponent } from 'src/app/pages/list/modal/modal.component';
+import { PopoverController  } from '@ionic/angular';
+import { PopoverComponent  } from './popover/popover.component';
 
 @Component({
   selector: 'app-list',
@@ -11,6 +13,7 @@ import { ModalComponent } from 'src/app/pages/list/modal/modal.component';
   styleUrls: ['list.page.scss']
 })
 export class ListPage implements OnInit {
+  currentTable = '';
   currentSearchWord = '';
   searchword = '';
   currentIdx = -1;
@@ -25,12 +28,30 @@ export class ListPage implements OnInit {
   ini = 0;
   constructor(
     private databaseservice: DatabaseService,
-    private modalController: ModalController
+    private modalController: ModalController,
+    private popoverCtrl: PopoverController
   ) {
   }
 
   ngOnInit() {
     this.getWords();
+  }
+
+  async presentPopover(ev) {
+    const popover = await this.popoverCtrl.create({
+      component: PopoverComponent,
+      event: ev,
+      translucent: true
+    });
+    popover.onDidDismiss().then(obj => {
+      if (obj.data) {
+        this.ini = 0;
+        this.tmpwords = [];
+        this.currentTable = obj.data.fromidiom + obj.data.toidiom;
+        this.databaseservice.loadWords(0, 100, this.currentTable);
+      }
+    });
+    await popover.present();
   }
 
   getWords() {
@@ -49,12 +70,10 @@ export class ListPage implements OnInit {
 
   incrementTmpWords() {
     if (this.currentSearchWord === '') {
-      this.databaseservice.loadWords(this.ini, 100).then((words: Word[]) => {
-        
+      this.databaseservice.loadWords(this.ini + 1, 100, this.currentTable).then((words: Word[]) => {
       });
     } else {
-      this.databaseservice.searchWord(this.currentSearchWord, 'quechua', this.ini).then((words: Word[]) => {
-        
+      this.databaseservice.searchWord(this.currentSearchWord, this.currentTable, this.ini).then((words: Word[]) => {
       });
     }
   }
@@ -64,15 +83,15 @@ export class ListPage implements OnInit {
     if (val === '') {
       this.ini = 0;
       this.tmpwords = [];
-      this.databaseservice.loadWords(this.ini, 100).then((words: Word[]) => {
-      
+      this.databaseservice.loadWords(this.ini, 100, this.currentTable).then((words: Word[]) => {
+
       });
     } else {
       if (val && val.trim() !== '') {
         this.ini = 0;
         this.tmpwords = [];
-        this.databaseservice.searchWord(val, 'quechua', this.ini).then(res => {
-        
+        this.databaseservice.searchWord(val, this.currentTable, this.ini).then(res => {
+
         });
       }
     }
@@ -130,8 +149,8 @@ export class ListPage implements OnInit {
     this.progress = 0;
   }
 
-  deleteWord(word, i) {
-    this.databaseservice.deleteWord(word).then(res => {
+  deleteWord(word) {
+    this.databaseservice.deleteWord(word, this.currentTable).then(res => {
       if (res) {
         this.closeEdit();
       }
@@ -147,7 +166,7 @@ export class ListPage implements OnInit {
   }
 
   editWord(word) {
-    this.databaseservice.updateWord(word).then(res => {
+    this.databaseservice.updateWord(word, this.currentTable).then(res => {
       if (res) {
         this.closeEdit();
       }
@@ -156,7 +175,10 @@ export class ListPage implements OnInit {
 
   async addNewWord() {
     const modal = await this.modalController.create({
-      component: ModalComponent
+      component: ModalComponent,
+      componentProps: {
+        table: this.currentTable
+      }
     });
     return await modal.present();
   }

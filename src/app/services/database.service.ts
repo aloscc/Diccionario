@@ -37,11 +37,9 @@ export class DatabaseService {
       location: 'default'
     }).then((db: SQLiteObject) => {
       this.database = db;
-      return this.cleanTable('dictionary');
-    }).then(res => {
-      return this.cleanTable('quechua');
-    }).then(res => {
       return this.createTableDictionary();
+    }).then(res => {
+      return this.loadDictionaries();
     }).then(res => {
       this.dbReady.next(true);
     });
@@ -58,75 +56,52 @@ export class DatabaseService {
     });
   }
 
-  seedDatabase() {
-    this.http.get('assets/dbs/' + this.dbname, { responseType: 'text' })
-      .subscribe(sql => {
-        this.sqlitePorter.importSqlToDb(this.database, sql)
-          .then(_ => {
-            this.loadWords();
-            this.dbReady.next(true);
-          })
-          .catch(e => console.error(e));
-      });
-  }
-
-  seedDatabase2() {
-    this.http.get('assets/dbs/' + this.dbname, { responseType: 'text' })
-      .subscribe(codes => {
-        let arrWords:Word[] = this.formatLinesStrings(codes.split(/[\r\n]+/));
-        let sql = this.generaSql(arrWords);
-        this.nativestorage.clear().then(res => {
-          this.sqlitePorter.importSqlToDb(this.database, sql).then(_ => {
-            this.loadWords();
-            this.dbReady.next(true);
-          }).catch(e => {
-            console.error(e);
-          });
-        });
-      });
-  }
-
-  formatLinesStrings(strings: String[]) {
-    let arrWords:Word[] = [];
+  formatLinesStrings(strings: string[]) {
+    const arrWords: Word[] = [];
     strings.forEach((w, i) => {
       // const tmparr =  w.replace(/\"/g,'').split('(');
       const tmparr =  w.split(' ');
-      const word = tmparr.shift();
-      const definition = tmparr.join(' ');
-      const newWord: Word = {wordId: i, word: word, definition: definition};
+      const tword = tmparr.shift();
+      const tdefinition = tmparr.join(' ');
+      const newWord = {
+        wordId: ++i,
+        word: tword,
+        definition: tdefinition
+      };
       arrWords.push(newWord);
     });
     return arrWords;
   }
 
-  seedDatabaseDinamic(lines) {
+  seedDatabaseDinamic(lines, table) {
     return new Promise(resolve => {
-      const sql = this.generaSql(this.formatLinesStrings(lines));
-      this.sqlitePorter.importSqlToDb(this.database, sql).then(_ => {
-        this.loadWords().then(res => {
+      this.cleanTable(table).then(res => {
+        const sql = this.generaSql(this.formatLinesStrings(lines), table);
+        this.sqlitePorter.importSqlToDb(this.database, sql).then(_ => {
           this.dbReady.next(true);
           resolve(true);
+        }).catch(e => {
+          console.error(e);
+          resolve(false);
         });
-      }).catch(e => {
-        console.error(e);
-        resolve(false);
       });
     });
   }
 
   generaSql(arrayitems: Word[], table = 'quechua') {
-    let i, j, chunk = 500;
-    let insertchunks = [];
+    let i, j;
+    const chunk = 500;
+    const insertchunks = [];
     let queryG = 'CREATE TABLE IF NOT EXISTS ' + table + '(wordId INTEGER PRIMARY KEY AUTOINCREMENT, word TEXT, definition TEXT);';
     for (i = 0, j = arrayitems.length; i < j; i += chunk) {
-      let items = arrayitems.slice(i,i+chunk);
+      const items = arrayitems.slice(i, i+chunk);
       let batchqueryG = ' INSERT INTO ' + table;
       let flag = false;
-      for (let i = 0; i < items.length; i++) {
-        let item = items[i];
+      for (let ii = 0; ii < items.length; ii++) {
+        let item = items[ii];
         if (item) {
           flag = true;
-          if (i == 0) {
+          if (ii == 0) {
             batchqueryG += ` SELECT "${item.wordId}" AS 'wordId', "${item.word}" AS 'word', "${item.definition}" AS 'definition'`;  
           } else {
             batchqueryG += ` UNION ALL SELECT "${item.wordId}" AS 'wordId', "${item.word}", "${item.definition}"`;
@@ -153,9 +128,9 @@ export class DatabaseService {
     return this.words.asObservable();
   }
 
-  loadWords(postinitial = 0, size = 100) {
+  loadWords(postinitial = 0, size = 100, table = 'quechua') {
     return new Promise(resolve => {
-      this.database.executeSql(`SELECT * FROM quechua 
+      this.database.executeSql(`SELECT * FROM ${table}  
                 WHERE wordId BETWEEN ${postinitial} AND ${postinitial + size} 
                 ORDER BY wordId ASC`, []).then(data => {
                   const words: Word[] = [];
@@ -221,7 +196,7 @@ export class DatabaseService {
       }, error => {
         resolve(false);
       }).then(res => {
-        return this.loadWords();
+        return this.loadWords(0, 100, table);
       }, error => {
         resolve(false);
       }).then(res => {
@@ -233,7 +208,7 @@ export class DatabaseService {
   deleteWord(word: Word, table = 'quechua') {
     return new Promise(resolve => {
       this.database.executeSql('DELETE FROM ' + table + ' WHERE wordId = ?', [word.wordId]).then(_ => {
-        return this.loadWords();
+        return this.loadWords(0, 100, table);
       }, error => {
         resolve(false);
       }).then(res => {
@@ -246,7 +221,7 @@ export class DatabaseService {
     return new Promise(resolve => {
       this.database.executeSql(`UPDATE ${table} SET definition = '${word.definition}', 
               word = '${word.word}' WHERE wordId = ${word.wordId}`, []).then(data => {
-                return this.loadWords();
+                return this.loadWords(0, 100, table);
               }, error => {
                 resolve(false);
               }).then(res => {

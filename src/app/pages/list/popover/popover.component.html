@@ -1,0 +1,4 @@
+<ion-list>
+  <ion-list-header>Seleccione:</ion-list-header>
+  <ion-item *ngFor="let dictionary of dictionaries" (click)="selectDictionary(dictionary)">{{dictionary.fromidiom}} - {{dictionary.toidiom}}</ion-item>
+</ion-list>
